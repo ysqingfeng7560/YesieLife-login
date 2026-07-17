@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<!-- saved from url=(0037)https://501218c7.login-5c6.pages.dev/ -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style data-merge-styles="true"></style>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 / 注册</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      min-height: 100vh;
+      background: url("9129d2a83b8a6b98d09e143a445681a1.png") no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ✅ 背景磨砂渐变效果 */
+    body::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      backdrop-filter: blur(0px);
+      background-color: rgba(255,255,255,0.05);
+      transition: backdrop-filter 2s ease-in-out;
+      z-index: 0;
+    }
+
+    body.loaded::after {
+      backdrop-filter: blur(10px);
+    }
+
+    .auth-container {
+      position: relative;
+      z-index: 1;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 20px;
+      padding: 30px 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease;
+    }
+
+    .auth-container:hover {
+      transform: scale(1.01);
+    }
+
+    .tab-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .tab-buttons button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: #eee;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s, color 0.3s;
+      font-size: 1rem;
+    }
+
+    .tab-buttons button.active {
+      background: #0078D4;
+      color: white;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .form-group input:focus {
+      border-color: #0078D4;
+      box-shadow: 0 0 5px rgba(0,120,212,0.4);
+      outline: none;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 12px;
+      background: #0078D4;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .submit-btn:hover {
+      background: #005fa3;
+    }
+
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+
+    .form-tab {
+      display: none;
+    }
+
+    .form-tab.active {
+      display: block;
+    }
+
+    .error {
+      color: red;
+      font-size: 0.9rem;
+      margin-top: -10px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 480px) {
+      .auth-container {
+        padding: 20px 24px;
+        border-radius: 14px;
+      }
+
+      .tab-buttons button {
+        font-size: 0.95rem;
+        padding: 10px;
+      }
+
+      .form-group input, .submit-btn {
+        font-size: 0.95rem;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="auth-container">
+    <h2>欢迎来到 YeSong | Yesie Life</h2>
+    <div class="tab-buttons">
+      <button class="tab-link active" onclick="showTab('login', event)">登录</button>
+      <button class="tab-link" onclick="showTab('register', event)">注册</button>
+    </div>
+
+    <!-- 登录表单 -->
+    <form id="login" class="form-tab active" onsubmit="return handleLogin(event)">
+      <div class="form-group">
+        <input type="text" id="login-account" placeholder="邮箱 / 手机号">
+      </div>
+      <div class="form-group">
+        <input type="password" id="login-password" placeholder="密码">
+      </div>
+      <div id="login-error" class="error"></div>
+      <button type="submit" class="submit-btn">登录</button>
+    </form>
+
+    <!-- 注册表单 -->
+    <form id="register" class="form-tab" onsubmit="return handleRegister(event)">
+      <div class="form-group">
+        <input type="text" id="reg-account" placeholder="邮箱 / 手机号">
+      </div>
+      <div class="form-group">
+        <input type="password" id="reg-password" placeholder="密码">
+      </div>
+      <div class="form-group">
+        <input type="password" id="reg-confirm" placeholder="确认密码">
+      </div>
+      <div class="form-group">
+        <input type="text" id="reg-code" placeholder="认证码（可选）">
+      </div>
+      <div id="reg-error" class="error"></div>
+      <button type="submit" class="submit-btn">注册</button>
+    </form>
+  </div>
+
+<script>
+  // 页面加载后触发背景模糊渐变
+  window.addEventListener('load', () => {
+    document.body.classList.add('loaded');
+  });
+
+  function showTab(tabId, event) {
+    document.querySelectorAll('.form-tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelector(`#${tabId}`).classList.add('active');
+    document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  // 登录提交
+  function handleLogin(event) {
+    event.preventDefault();
+    const account = document.getElementById('login-account').value.trim();
+    const password = document.getElementById('login-password').value.trim();
+    const errorBox = document.getElementById('login-error');
+    errorBox.textContent = '';
+
+    if (!account || !password) {
+      errorBox.textContent = '请填写所有字段';
+      return false;
+    }
+
+    if (password.length < 6) {
+      errorBox.textContent = '密码至少 6 位';
+      return false;
+    }
+
+    fetch('/api/login.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ account, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        alert('登录成功！');
+        // 登录成功后，可做跳转等操作
+        // window.location.href = 'dashboard.html'; // 示例
+      } else {
+        errorBox.textContent = data.message;
+      }
+    })
+    .catch(() => {
+      errorBox.textContent = '网络错误，请稍后重试';
+    });
+
+    return false;
+  }
+
+  // 注册提交
+  function handleRegister(event) {
+    event.preventDefault();
+    const account = document.getElementById('reg-account').value.trim();
+    const password = document.getElementById('reg-password').value.trim();
+    const confirm = document.getElementById('reg-confirm').value.trim();
+    const code = document.getElementById('reg-code').value.trim();
+    const errorBox = document.getElementById('reg-error');
+    errorBox.textContent = '';
+
+    if (!account || !password || !confirm) {
+      errorBox.textContent = '请填写所有字段（认证码可选）';
+      return false;
+    }
+
+    if (password.length < 6) {
+      errorBox.textContent = '密码至少 6 位';
+      return false;
+    }
+
+    if (password !== confirm) {
+      errorBox.textContent = '密码与确认密码不一致';
+      return false;
+    }
+
+    fetch('/api/register.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ account, password, code })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        alert('注册成功！请登录');
+        showTab('login', { target: document.querySelector('.tab-link') }); // 切换到登录页
+      } else {
+        errorBox.textContent = data.message;
+      }
+    })
+    .catch(() => {
+      errorBox.textContent = '网络错误，请稍后重试';
+    });
+
+    return false;
+  }
+</script>
+
+
+</body></html>
